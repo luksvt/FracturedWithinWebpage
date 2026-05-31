@@ -4,6 +4,7 @@ import SocialLinks from "@/components/SocialLinks";
 import Wallpaper from "@/assets/Wallpaper3_fullhd.png";
 import MessiahArtwork from "@/assets/Messiah_artwork.jpeg";
 import PossessedArtwork from "@/assets/FracturedWithin_Possessed_Cover.jpg";
+import LeftfordeadArtwork from "@/assets/FracturedWithin_LeftForDead_Cover.jpg";
 
 import { ListenNowCard } from "@/components/ListenNowCard";
 import { ReleaseCard } from "@/components/ReleaseCard";
@@ -25,6 +26,17 @@ const Home = () => {
             />
           </div>
         </div>
+
+        <ListenNowCard trackId="leftfordead" />
+
+        <ReleaseCard
+          dateLabel="15.05.26"
+          title="LEFT FOR DEAD"
+          releaseDateText="May 31, 2026"
+          countdownDate="2026-05-31T00:00:00"
+          presaveUrl="https://distrokid.com/hyperfollow/fracturedwithin1/left-for-dead"
+          artwork={LeftfordeadArtwork}
+        />
 
         <VideoCard
         dateLabel="26.03.26"

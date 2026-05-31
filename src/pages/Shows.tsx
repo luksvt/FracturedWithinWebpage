@@ -19,15 +19,15 @@ const Shows = () => {
   // Sample tour data - easily maintainable
   const tours: Tour[] = [
     
-  //   {
-  //   id: '1',
-  //   date: '2024-03-15',
-  //   venue: 'Madison Square Garden',
-  //   city: 'New York',
-  //   country: 'USA',
-  //   ticketUrl: 'https://example.com/tickets',
-  //   upcoming: true
-  // }, 
+    {
+    id: '1',
+    date: '2026-12-18',
+    venue: 'Helvete Metal Club',
+    city: 'Oberhausen',
+    country: 'Germany',
+    ticketUrl: 'https://www.sph-music-masters.de/tickets',
+    upcoming: true
+  }, 
   // {
   //   id: '2',
   //   date: '2024-03-18',
