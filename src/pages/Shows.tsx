@@ -25,7 +25,7 @@ const Shows = () => {
     venue: 'Helvete Metal Club',
     city: 'Oberhausen',
     country: 'Germany',
-    ticketUrl: 'https://www.sph-music-masters.de/tickets',
+    ticketUrl: 'https://www.sph-music-masters.de/tickets/index/4201',
     upcoming: true
   }, 
   // {
