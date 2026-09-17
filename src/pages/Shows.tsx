@@ -32,8 +32,6 @@ interface BandsintownEvent {
 }
 
 const ARTIST_NAME = 'Fractured Within';
-const BANDSINTOWN_APP_ID = import.meta.env.VITE_BANDSINTOWN_APP_ID?.trim();
-
 const buildBandsintownUrl = (eventUrl: string, trigger: 'rsvp_going' | 'notify_me') => {
   const separator = eventUrl.includes('?') ? '&' : '?';
   return `${eventUrl}${separator}trigger=${trigger}`;
@@ -70,16 +68,10 @@ const formatLocation = (venue: BandsintownVenue) =>
 
 const Shows = () => {
   const [events, setEvents] = useState<BandsintownEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(Boolean(BANDSINTOWN_APP_ID));
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!BANDSINTOWN_APP_ID) {
-      setError('Bandsintown is not configured yet.');
-      setIsLoading(false);
-      return;
-    }
-
     const controller = new AbortController();
 
     const loadEvents = async () => {
@@ -87,15 +79,13 @@ const Shows = () => {
         setIsLoading(true);
         setError(null);
 
-        const artist = encodeURIComponent(ARTIST_NAME);
-        const appId = encodeURIComponent(BANDSINTOWN_APP_ID);
-        const response = await fetch(
-          `https://rest.bandsintown.com/artists/${artist}/events?app_id=${appId}&date=upcoming`,
-          { signal: controller.signal },
-        );
+        const response = await fetch('/api/shows.php', {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
 
         if (!response.ok) {
-          throw new Error(`Bandsintown request failed with status ${response.status}`);
+          throw new Error(`Shows API request failed with status ${response.status}`);
         }
 
         const data: unknown = await response.json();

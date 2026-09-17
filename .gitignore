@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 .venv*
+# Server-side Bandsintown secret
+public/api/config.php

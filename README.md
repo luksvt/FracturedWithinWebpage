@@ -100,3 +100,18 @@ The site uses `https://fracturedwithin.de` as its canonical domain. Basic metada
 A 1200x630 social preview is available at `public/og-image.jpg`. `public/sitemap.xml` and `public/robots.txt` point search engines to the public routes.
 
 Large local images used by the UI have WebP versions under `src/assets/optimized/`. Keep the original source files if you want them for future artwork editing; Vite only bundles the assets that are actually imported by the app.
+
+## Bandsintown via PHP (Netcup)
+
+The shows page no longer calls Bandsintown directly from the browser. Instead it requests `/api/shows.php`, which fetches the upcoming events server-side and caches the response for 15 minutes.
+
+### Configure the API key
+
+1. Open `public/api/config.php`.
+2. Replace `PASTE_YOUR_BANDSINTOWN_API_KEY_HERE` with the API key from Bandsintown for Artists.
+3. Run the normal Vite build (`npm run build`). Vite copies the PHP files from `public/api/` into `dist/api/` unchanged.
+4. Upload the contents of `dist/` to the Netcup web root as usual.
+
+After deployment, opening `https://fracturedwithin.de/api/shows.php` directly should return a JSON array. If it does, the server-side Bandsintown connection is working.
+
+Do not commit the real `public/api/config.php` to a public Git repository. It is listed in `.gitignore`; `config.example.php` can be committed safely.
