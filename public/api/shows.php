@@ -9,7 +9,7 @@ const ARTIST_NAME = 'Fractured Within';
 const CACHE_TTL = 900;
 const STALE_CACHE_TTL = 86400;
 
-function respond(int $status, mixed $payload): never
+function respond(int $status, $payload)
 {
     http_response_code($status);
     echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
