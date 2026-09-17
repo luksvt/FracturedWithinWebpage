@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ExternalLink, Loader2, MapPin } from 'lucide-react';
+import { CalendarPlus, ExternalLink, Loader2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Navigation from '@/components/Navigation';
 import Seo from '@/components/Seo';
 import SocialLinks from '@/components/SocialLinks';
@@ -66,6 +72,119 @@ const formatEventDate = (datetime: string) => {
 const formatLocation = (venue: BandsintownVenue) =>
   [venue.city, venue.region, venue.country].filter(Boolean).join(', ');
 
+const getCalendarTitle = (event: BandsintownEvent) =>
+  event.title || `${ARTIST_NAME} at ${event.venue.name}`;
+
+const parseLocalDateTime = (datetime: string) => {
+  const match = datetime.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, second = '00'] = match;
+  return {
+    year: Number(year),
+    month: Number(month),
+    day: Number(day),
+    hour: Number(hour),
+    minute: Number(minute),
+    second: Number(second),
+  };
+};
+
+const toCalendarTimestamp = (parts: ReturnType<typeof parseLocalDateTime>) => {
+  if (!parts) return null;
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${parts.year}${pad(parts.month)}${pad(parts.day)}T${pad(parts.hour)}${pad(parts.minute)}${pad(parts.second)}`;
+};
+
+const addHoursToLocalDateTime = (datetime: string, hours: number) => {
+  const parts = parseLocalDateTime(datetime);
+  if (!parts) return null;
+
+  const date = new Date(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour + hours,
+    parts.minute,
+    parts.second,
+  );
+
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds(),
+  };
+};
+
+const buildGoogleCalendarUrl = (event: BandsintownEvent) => {
+  const start = toCalendarTimestamp(parseLocalDateTime(event.datetime));
+  const end = toCalendarTimestamp(addHoursToLocalDateTime(event.datetime, 3));
+  if (!start || !end) return null;
+
+  const location = [event.venue.name, formatLocation(event.venue)].filter(Boolean).join(', ');
+  const details = [event.description, `Event: ${event.url}`].filter(Boolean).join('\n\n');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: getCalendarTitle(event),
+    dates: `${start}/${end}`,
+    location,
+    details,
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
+
+const escapeIcsText = (value: string) =>
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/\r?\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+
+const downloadIcs = (event: BandsintownEvent) => {
+  const start = toCalendarTimestamp(parseLocalDateTime(event.datetime));
+  const end = toCalendarTimestamp(addHoursToLocalDateTime(event.datetime, 3));
+  if (!start || !end) return;
+
+  const location = [event.venue.name, formatLocation(event.venue)].filter(Boolean).join(', ');
+  const description = [event.description, `Event: ${event.url}`].filter(Boolean).join('\n\n');
+  const uid = `fractured-within-${event.id}@fracturedwithin.de`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Fractured Within//Shows//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${start}`,
+    `DTEND:${end}`,
+    `SUMMARY:${escapeIcsText(getCalendarTitle(event))}`,
+    `LOCATION:${escapeIcsText(location)}`,
+    `DESCRIPTION:${escapeIcsText(description)}`,
+    `URL:${event.url}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+    '',
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `fractured-within-${event.id}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
 const Shows = () => {
   const [events, setEvents] = useState<BandsintownEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +198,25 @@ const Shows = () => {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/shows.php', {
+        const endpoint = import.meta.env.DEV
+          ? (() => {
+              const appId = import.meta.env.VITE_BANDSINTOWN_APP_ID;
+              if (!appId) {
+                throw new Error(
+                  'Missing VITE_BANDSINTOWN_APP_ID. Add it to .env.local for local development.',
+                );
+              }
+
+              const artist = encodeURIComponent(ARTIST_NAME);
+              const params = new URLSearchParams({
+                app_id: appId,
+                date: 'upcoming',
+              });
+              return `https://rest.bandsintown.com/artists/${artist}/events?${params.toString()}`;
+            })()
+          : '/api/shows.php';
+
+        const response = await fetch(endpoint, {
           signal: controller.signal,
           headers: { Accept: 'application/json' },
         });
@@ -217,6 +354,31 @@ const Shows = () => {
                           Event
                         </a>
                       </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline">
+                            <CalendarPlus className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Save to Calendar
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {buildGoogleCalendarUrl(event) && (
+                            <DropdownMenuItem asChild>
+                              <a
+                                href={buildGoogleCalendarUrl(event) ?? '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Google Calendar
+                              </a>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onSelect={() => downloadIcs(event)}>
+                            Apple Calendar / Outlook (.ics)
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </article>
                 );

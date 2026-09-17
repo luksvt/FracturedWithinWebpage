@@ -115,3 +115,22 @@ The shows page no longer calls Bandsintown directly from the browser. Instead it
 After deployment, opening `https://fracturedwithin.de/api/shows.php` directly should return a JSON array. If it does, the server-side Bandsintown connection is working.
 
 Do not commit the real `public/api/config.php` to a public Git repository. It is listed in `.gitignore`; `config.example.php` can be committed safely.
+
+
+## Local Bandsintown development
+
+The production site loads shows through `public/api/shows.php`. Vite does not execute PHP locally, so development mode uses the Bandsintown API directly instead.
+
+Create `.env.local` in the project root:
+
+```env
+VITE_BANDSINTOWN_APP_ID=YOUR_BANDSINTOWN_API_KEY
+```
+
+Then start the site with:
+
+```bash
+npm run dev
+```
+
+`npm run dev` uses the local `VITE_BANDSINTOWN_APP_ID`. Production builds ignore this development path and continue to request `/api/shows.php`. Keep `.env.local` out of Git.
