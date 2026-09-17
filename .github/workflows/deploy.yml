@@ -22,6 +22,16 @@ jobs:
       - name: Dependencies installieren
         run: npm ci
 
+      - name: Bandsintown Config erzeugen
+        run: |
+          mkdir -p public/api
+          cat > public/api/config.php <<'PHP'
+          <?php
+          return [
+              'bandsintown_app_id' => '${{ secrets.BANDSINTOWN_APP_ID }}',
+          ];
+          PHP
+
       - name: Build erstellen
         run: npm run build
 
