@@ -1,8 +1,14 @@
 import Navigation from '@/components/Navigation';
+import Seo from '@/components/Seo';
 
 const Impressum = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Impressum"
+        path="/impressum"
+        description="Legal notice and privacy information for fracturedwithin.de."
+      />
       <Navigation />
       
       <main className="container mx-auto px-4 py-12 flex-1 flex flex-col">

@@ -1,14 +1,32 @@
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SocialLinks from '@/components/SocialLinks';
+import Seo from '@/components/Seo';
+import BandHero from '@/assets/optimized/band-hero.webp';
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="About"
+        path="/about"
+        description="About Fractured Within — groove-driven modern metal from NRW, Germany. Band bio, lineup and background."
+      />
       <Navigation />
       <main className="container mx-auto px-4 py-12 flex-1">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-12">About</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">About</h1>
+
+          <div className="mb-10 overflow-hidden border border-white/10 bg-black">
+            <img
+              src={BandHero}
+              alt="Fractured Within band"
+              className="w-full h-auto"
+              width="1600"
+              height="900"
+              decoding="async"
+            />
+          </div>
           
             {/* Bio Section */}
             <Card className="mb-8 overflow-hidden bg-card/80 border border-primary/30 shadow-xl">

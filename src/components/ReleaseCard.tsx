@@ -77,7 +77,13 @@ export function ReleaseCard({
           </CardHeader>
 
           <CardContent className="p-0">
-            <img src={artwork} alt={title} className="w-full h-auto" />
+            <img
+              src={artwork}
+              alt={`${title} artwork`}
+              className="w-full h-auto"
+              loading="lazy"
+              decoding="async"
+            />
           </CardContent>
         </Card>
       </section>

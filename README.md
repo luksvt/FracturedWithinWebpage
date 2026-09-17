@@ -71,3 +71,32 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Bandsintown show sync
+
+The Shows page reads upcoming Fractured Within events directly from the Bandsintown Artist Events API.
+
+1. In Bandsintown for Artists, open **Settings -> General** and copy the band's API Key.
+2. Copy `.env.example` to `.env.local`.
+3. Replace `your_bandsintown_api_key_here` with the API Key.
+4. Restart the Vite development server after changing the environment file.
+
+Only upcoming events are requested. Ticket links, venue/location information, lineup and the Bandsintown event link are rendered from the API response. If an event has no ticket offer, the page shows a Bandsintown **Notify Me** action instead.
+
+For production, set `VITE_BANDSINTOWN_APP_ID` in the hosting provider's environment/build settings before building the site.
+
+## Big Cartel merch sync
+
+The Merch page reads public product data directly from the Fractured Within Big Cartel shop using Big Cartel's public read-only API. No API key is required.
+
+The shop subdomain is configured in `src/pages/Merch.tsx` as `fracturedwithin`. Products are ordered using the position configured in Big Cartel. Product name, price, image and availability status are rendered automatically, and each product links to its Big Cartel product page.
+
+If Big Cartel cannot be reached, the page falls back to a direct link to the shop.
+
+## SEO and image optimization
+
+The site uses `https://fracturedwithin.de` as its canonical domain. Basic metadata and Open Graph/Twitter tags are defined in `index.html`, while route-specific titles/descriptions are updated by `src/components/Seo.tsx`.
+
+A 1200x630 social preview is available at `public/og-image.jpg`. `public/sitemap.xml` and `public/robots.txt` point search engines to the public routes.
+
+Large local images used by the UI have WebP versions under `src/assets/optimized/`. Keep the original source files if you want them for future artwork editing; Vite only bundles the assets that are actually imported by the app.

@@ -1,10 +1,16 @@
 import Navigation from '@/components/Navigation';
+import Seo from '@/components/Seo';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 
 const TechRider = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <Seo
+        title="Technical Rider"
+        path="/techrider"
+        description="Fractured Within technical rider and live production requirements."
+      />
       <Navigation />
       
       <main className="container mx-auto px-4 py-12 flex-1 flex flex-col">
